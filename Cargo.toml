@@ -1,0 +1,8 @@
+[package]
+name = "SoundWaves"
+version = "0.1.0"
+authors = ["Arvid Böttiger <bottiger@gmail.com>"]
+
+[dependencies]
+rusqlite = "0.6.0"
+time = "0.1.34"
