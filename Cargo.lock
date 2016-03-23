@@ -1,5 +1,5 @@
 [root]
-name = "SoundWaves"
+name = "soundwaves_core"
 version = "0.1.0"
 dependencies = [
  "rusqlite 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
