@@ -6,7 +6,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 pub type AMSubscription = Arc<Mutex<Subscription>>;
-pub type AMEpisode      = Arc<Mutex<Episode>>;
+pub type AMEpisode      = Arc<Episode>;
 
 pub type SubscriptionKey = i32;
 pub type EpisodeKey = i32;
@@ -15,7 +15,7 @@ pub type EpisodeKey = i32;
 pub struct Subscription {
         pub id: i32,
         pub title: String,
-        pub episodes: Vec<Arc<Mutex<Episode>>>
+        pub episodes: Vec<AMEpisode>
 }
 
 impl Subscription {
@@ -40,7 +40,7 @@ impl Subscription {
         return self.episodes.len();
     }
 
-    pub fn add_episode(&mut self, item: Arc<Mutex<Episode>>) {
+    pub fn add_episode(&mut self, item: AMEpisode) {
         self.episodes.push(item);
     }
 }
@@ -67,12 +67,12 @@ pub struct Episode {
         last_update:   Option<i64>,
         sub_title:     Option<String>,
         created_at:    Option<Timespec>,
-        subscription: Arc<Mutex<Subscription>>
+        subscription:  AMSubscription
 }
 
 impl Episode {
 
-    pub fn new(sub: Arc<Mutex<Subscription>>) -> Self {
+    pub fn new(sub: AMSubscription) -> Self {
         Episode {
             id:             -1,
             url:            None,
@@ -102,15 +102,12 @@ impl Episode {
         return self.id;
     }
 
-    pub fn set_subscription(&mut self, subscription: Arc<Mutex<Subscription>>) {
+    pub fn set_subscription(&mut self, subscription: AMSubscription) {
         self.subscription = subscription;
     }
 
-    pub fn get_subscription(&self) -> Arc<Mutex<Subscription>> {
+    pub fn get_subscription(&self) -> AMSubscription {
         return self.subscription.clone();
     }
 
-    pub fn notify_property_changed(&self) {
-
-    }
 }

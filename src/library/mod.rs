@@ -13,14 +13,16 @@ use super::types::Subscription;
 use super::types::Episode;
 use super::types::SubscriptionKey;
 use super::types::EpisodeKey;
+use super::types::AMEpisode;
+use super::types::AMSubscription;
 
 enum StateError { InvalidState }
 
 pub struct Library {
-    subscriptions:      Vec<Arc<Mutex<Subscription>>>,
-    subscriptions_map:  HashMap<SubscriptionKey, Arc<Mutex<Subscription>>>,
-    episodes:           Vec<Arc<Mutex<Episode>>>,
-    episodes_map:       HashMap<EpisodeKey, Arc<Mutex<Episode>>>,
+    subscriptions:      Vec<AMSubscription>,
+    subscriptions_map:  HashMap<SubscriptionKey, AMSubscription>,
+    episodes:           Vec<AMEpisode>,
+    episodes_map:       HashMap<EpisodeKey, AMEpisode>,
     episode_ids:        HashSet<EpisodeKey>    
 }
 
@@ -36,15 +38,14 @@ impl Library {
         }
     }
 
-    pub fn add_subscription(&mut self, item: Arc<Mutex<Subscription>>) {
+    pub fn add_subscription(&mut self, item: AMSubscription) {
         let id = item.lock().unwrap().get_id();
 
         self.subscriptions_map.insert(id, item.clone());        
         self.subscriptions.push(item);
     }
 
-    pub fn add_episode(&mut self, item: Arc<Mutex<Episode>>) {
-        let episode = item.lock().unwrap();
+    pub fn add_episode(&mut self, episode: AMEpisode) {
         let id = episode.get_id();
 
         if self.episode_ids.contains(&id) {
@@ -52,20 +53,20 @@ impl Library {
         }
 
         self.episode_ids.insert(id);
-        self.episodes.push(item.clone());
-        self.episodes_map.insert(id, item.clone());
+        self.episodes.push(episode.clone());
+        self.episodes_map.insert(id, episode.clone());
 
         let subm = episode.get_subscription();
 
         let sub = subm.lock().unwrap();
         let key = sub.get_key();
         match self.subscriptions_map.get_mut(&key) {
-            Some(subscription) => subscription.lock().unwrap().add_episode(item.clone()),
+            Some(subscription) => subscription.lock().unwrap().add_episode(episode.clone()),
             None               => println!("{} doens't match any subscription", key)
         }
     }
 
-    pub fn remove_subscription(&mut self, item: Arc<Mutex<Subscription>>) {
+    pub fn remove_subscription(&mut self, item: AMSubscription) {
         let id = item.lock().unwrap().get_key();
 
         let index = self.subscriptions.iter().position(|x| x.lock().unwrap().get_key() == item.lock().unwrap().get_key()).unwrap();
@@ -79,15 +80,15 @@ impl Library {
         self.subscriptions.clear();
     }
 
-    pub fn get_subscription(&mut self, id: SubscriptionKey) -> Option<&Arc<Mutex<Subscription>>> {
+    pub fn get_subscription(&mut self, id: SubscriptionKey) -> Option<&AMSubscription> {
         return self.subscriptions_map.get(&id);
     }
 
-    pub fn get_episodes(&mut self) -> &Vec<Arc<Mutex<Episode>>> {
+    pub fn get_episodes(&mut self) -> &Vec<AMEpisode> {
         return &self.episodes;
     }
 
-    pub fn get_episode(&mut self, id: EpisodeKey) -> Option<&Arc<Mutex<Episode>>> {
+    pub fn get_episode(&mut self, id: EpisodeKey) -> Option<&AMEpisode> {
         return self.episodes_map.get(&id); 
     }
 
